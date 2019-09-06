@@ -10,7 +10,7 @@
     <meta name="description" content>
     
     <title>
-      Archives - 小明的博客
+      Integer对象交换问题 - 小明的博客
     </title>
     <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/style/style.css">
@@ -28,7 +28,7 @@
         首页
       </a>
       
-      <a href="/archives" class="current">
+      <a href="/archives" class>
         归档
       </a>
       
@@ -55,82 +55,148 @@
           </div>
         </div>
         <div class="content">
-          <div class="archives">
-    
-    
+          <article class="post-entry">
+    <div class="header">
+      <div class="title">Integer对象交换问题</div>
+      <div class="meta">
+        <span class="item">
+          <span class="iconfont icon-time-circle"></span>
+          <span>2019/09/03</span>
+        </span>
 
+         
+        <span class="item">
+          <span class="iconfont icon-folder"></span>
+          <span>
+              
+                
+                  <a href="/categories/code">code</a>
+                
+              
+          </span>
+        </span>
+        
+        
+         
+          <span class="item">
+            <span class="iconfont icon-tag1"></span>
+            <span>
+                
+                  
+                    <a href="/tags/Java">Java</a>
+                  
+                
+            </span>
+          </span>
+         
 
-
-
-
-
-<section class="wrap">
-    <div class="meta">
-        <a href="/archives/2019" class="archive-meta">
-            2019
-        </a>
+        
+          <span class="item leancloud-visitors" id="/2019/09/03/9.3-Integer对象交换/" data-flag-title="Integer对象交换问题">
+            <span class="iconfont icon-eye1"></span>
+            <span class="leancloud-visitors-count"></span>
+          </span>
+        
+      </div>
+      <div>
+      </div>
     </div>
-    <div class="year">
-        
-        <article class="item">
-            
-            
-            <div class="content">
-                <div class="title">
-                    <a href="/2019/09/03/9.3-Integer对象交换/">
-                        Integer对象交换问题
-                    </a>
-                </div>
-                <div class="meta">
-                    <span class="meta-item">
-                        <span class="iconfont icon-time-circle"></span>
-                        <span>2019/09/06</span>
-                    </span>
-                    
+    <p>##我们先看一段代码：<br>    class Main {<br>    public static void swap(Integer i, Integer j) {<br>      Integer temp = new Integer(i);<br>      i = j;<br>      j = temp;<br>   }<br>   public static void main(String[] args) {<br>      Integer i = new Integer(10);<br>      Integer j = new Integer(20);<br>      swap(i, j);<br>      System.out.println(“i = “ + i + “, j = “ + j);<br>   }<br>    }<br>运行结果：  </p>
+<pre><code>i=10
+j=20
+</code></pre><p>从运行结果可以看出经过swap()之后i和j的值并没有改变。</p>
+<p>##具体可以了解下Integer的装箱和拆箱。</p>
+<pre><code>Integer.valueOf();
+    public static Integer valueOf(int i) {
+    if (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    return new Integer(i);
+}
 
-                    
-                </div>
-            </div>
-        </article>
-        
+/**
+ * The value of the {@code Integer}.
+ *
+ * @serial
+ */
+private final int value;
+</code></pre><p>从上面的代码就可以看出为什么i和j的值没有改变了，因为它们是<strong>final</strong>的。</p>
+<p>那么如何对final对象进行修改呢？</p>
+<p>##可以用反射，修改swap方法：</p>
+<p>如果把temp改为int，i==temp会返回什么结果呢？</p>
+<p>答案：false。</p>
+<p>如果在缓存区间，如何让a,b互换呢？</p>
+<pre><code>public static void swap(Integer i, Integer j) throws NoSuchFieldException, IllegalAccessException {
+    //利用反射修改private final对象
+    Field field =Integer.class.getDeclaredField(&quot;value&quot;);
+    field.setAccessible(true);
+    Integer temp =new Integer(i.intValue());
+    field.set(i,j.intValue());
+    field.set(j,temp);
+}
+public static void main(String[] args) throws NoSuchFieldException, IllegalAccessException {
+    Integer i = new Integer(10);
+    Integer j = new Integer(20);
+    swap(i, j);
+    System.out.println(&quot;i = &quot; + i + &quot;, j = &quot; + j);
+}
+</code></pre><p>运行结果：</p>
+<pre><code>i = 20, j = 10
+</code></pre><p>##总结：</p>
+<p>1.Integer装箱和拆箱</p>
+<p>2.Integer缓存</p>
+<p>3.利用反射修改private final对象</p>
 
-
-        <article class="item">
-            
-            
-            <div class="photo">
-                <a href="/2019/04/21/我的第一篇博客/" class="photo" title="我的第一篇博客" style="background-image: url( 'https://cdn.jsdelivr.net/gh/CodeMonsterM/cdn@1.0/img/banner/about.jpg' )"></a>
-            </div>
-            
-            <div class="content">
-                <div class="title">
-                    <a href="/2019/04/21/我的第一篇博客/">
-                        我的第一篇博客
-                    </a>
-                </div>
-                <div class="meta">
-                    <span class="meta-item">
-                        <span class="iconfont icon-time-circle"></span>
-                        <span>2019/09/06</span>
-                    </span>
-                    
-
-                    
-                </div>
-            </div>
-        </article>
-        
-        
-    </div>
-</section>
 
   
 
-  <div class="paginator">
-        <span class="page-number current">1</span>
+  
+    <div class="post-reward">
+      <div id="reward-button">请杯咖啡呗~</div>
+      <div id="qr">
+        <div class="wrap">
+            
+            <div class="bg-wrap">
+              <a href="/images/AiPay.jpg" target="_block" class="bg" style="background-image:url('/images/AiPay.jpg')"></a>
+              支付宝
+            </div>
+            
+            
+            <div class="bg-wrap">
+                <a href="/images/WeChat.png" target="_block" class="bg" style="background-image:url('/images/WeChat.png')"></a>
+              微信
+            </div>
+            
+        </div>
+      </div>
+    </div>
+  
+  
+  <div class="post-guide">
+    <div class="item left">
+        
+    </div>
+    <div class="item right">
+        
+          <a href="2019/04/21/我的第一篇博客/">我的第一篇博客<span class="iconfont icon-right"></span></a>
+        
+    </div>
   </div>
-</div>
 
+  
+
+  <div class="post-copyright">
+    <div class="auth">
+      本文作者：<a href="https://codemonsterm.github.io">小明</a>
+    </div>
+    <div class="link">
+      永久链接：<a href="https://codemonsterm.github.io/2019/09/03/9.3-Integer对象交换/">https://codemonsterm.github.io/2019/09/03/9.3-Integer对象交换/</a>
+    </div>
+    <div class="declare">
+      版权声明：本文首发于<a href="https://codemonsterm.github.io">小明</a>的博客，转载请注明出处！
+    </div>
+  </div>
+
+  <div id="comment"></div>
+</article>
         </div>
         <footer>
           <div class="copyright">
@@ -169,7 +235,7 @@
             </a>
             
           </div>
-          
+            
           <div class="category-widget">
             <div class="title">
               <span>Categories</span>
